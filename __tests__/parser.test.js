@@ -110,7 +110,7 @@ describe('Parser Tests', () => {
       expect(() => parse("3 +")).toThrow();
       expect(() => parse("+ 3")).toThrow();
       expect(() => parse("3 + + 4")).toThrow();
-      expect(() => parse("3.5")).toThrow(); // Only integers are supported
+      expect(parse("3.5")).toBe(3.5);
     });
 
     test('should handle incomplete expressions', () => {
@@ -127,5 +127,36 @@ describe('Parser Tests', () => {
       expect(parse("7 - 5 - 1")).toBe(1);
     });
   });
+
+  const parser = require('../src/parser');
+
+describe('Pruebas del Analizador Léxico (Puntos 4 y 5)', () => {
+  
+  test('Debe ignorar comentarios de una línea', () => {
+    // El resultado de "2 + // comentario \n 3" debe ser 5
+    const input = "2 + // esto es un comentario \n 3";
+    expect(parser.parse(input)).toBe(5);
+  });
+
+  test('Debe reconocer números decimales simples', () => {
+    expect(parser.parse("2.35 + 1")).toBe(3.35);
+  });
+
+  test('Debe reconocer notación científica (e-3)', () => {
+    // 2000 * 2e-3 = 4
+    expect(parser.parse("2000 * 2e-3")).toBe(4);
+  });
+
+  test('Debe reconocer notación científica con signo positivo (E+3)', () => {
+    // 2.5E+3 = 2500
+    expect(parser.parse("2.5E+3 / 10")).toBe(250);
+  });
+
+  test('Debe lanzar error o INVALID ante caracteres inesperados', () => {
+    expect(() => {
+      parser.parse("2 @ 3");
+    }).toThrow();
+  });
+});
 
 });
